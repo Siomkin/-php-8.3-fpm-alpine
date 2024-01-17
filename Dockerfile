@@ -14,6 +14,7 @@ RUN apk add freetype-dev libjpeg-turbo-dev libpng-dev jpeg-dev libwebp-dev
 
 RUN apk add supervisor bash curl unzip git
 
+RUN apk add --update linux-headers
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
