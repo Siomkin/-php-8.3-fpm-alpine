@@ -12,7 +12,7 @@ RUN apk add mariadb-client ca-certificates postgresql-dev libssh-dev zip libzip-
 
 RUN apk add freetype-dev libjpeg-turbo-dev libpng-dev jpeg-dev libwebp-dev
 
-RUN apk add supervisor bash curl unzip git cron
+RUN apk add supervisor bash curl unzip git dcron
 
 RUN apk add --update linux-headers
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
