@@ -2,29 +2,51 @@ FROM php:8.3.14-fpm-alpine
 
 ENV TZ=UTC
 
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+# Set timezone and add the PHP extension installer
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    apk add --no-cache curl && \
+    curl -o /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+    chmod +x /usr/local/bin/install-php-extensions
 
-RUN apk update && apk upgrade
+# Update and install dependencies
+RUN apk update && apk upgrade && \
+    apk add --no-cache \
+        mariadb-client \
+        ca-certificates \
+        postgresql-dev \
+        libssh-dev \
+        zip \
+        libzip-dev \
+        libxml2-dev \
+        jpegoptim \
+        optipng \
+        pngquant \
+        gifsicle \
+        libxslt-dev \
+        rabbitmq-c-dev \
+        icu-dev \
+        oniguruma-dev \
+        gmp-dev \
+        freetype-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        jpeg-dev \
+        libwebp-dev \
+        supervisor \
+        bash \
+        unzip \
+        git \
+        dcron \
+        linux-headers
 
-# Install dependencies
-RUN apk add mariadb-client ca-certificates postgresql-dev libssh-dev zip libzip-dev libxml2-dev jpegoptim optipng pngquant gifsicle libxslt-dev rabbitmq-c-dev icu-dev oniguruma-dev gmp-dev
+# Install PHP extensions
+RUN install-php-extensions zip opcache pdo_mysql pdo_pgsql mysqli bcmath sockets xsl exif intl gmp pcntl redis gd
 
-RUN apk add freetype-dev libjpeg-turbo-dev libpng-dev jpeg-dev libwebp-dev
-
-RUN apk add supervisor bash curl unzip git dcron
-
-RUN apk add --update linux-headers
-RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    && pecl install xdebug \
-    && docker-php-ext-enable xdebug \
-    && apk del -f .build-deps
-
-# Install extensions
-RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions zip opcache pdo_mysql pdo_pgsql mysqli bcmath sockets xsl exif intl gmp pcntl redis gd
-
-#RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp && docker-php-ext-install gd
+# Install and enable xdebug
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS && \
+    pecl install xdebug && \
+    docker-php-ext-enable xdebug && \
+    apk del -f .build-deps
 
 WORKDIR /var/www
 
